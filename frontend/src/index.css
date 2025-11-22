@@ -1,0 +1,81 @@
+@import "tailwindcss";
+
+@plugin "daisyui" {
+  themes: light --default, forest;
+}
+
+@plugin "daisyui/theme" {
+  name: "light";
+  default: true;
+  
+  /* Light theme with your green colors */
+  --color-base-100: #ffffff;
+  --color-base-200: #f8f9fa;
+  --color-base-300: #e9ecef;
+  --color-base-400: #dee2e6;
+  --color-base-content: #212529; /* Dark text for contrast */
+  
+  --color-primary: #00924b; /* Your medium green */
+  --color-primary-content: #ffffff;
+  
+  --color-secondary: #1c4a29; /* Your dark green */
+  --color-secondary-content: #ffffff;
+  
+  --color-accent: #81e59d; /* Your light green */
+  --color-accent-content: #0e2a17; /* Dark text on light green */
+  
+  --color-neutral: #6c757d;
+  --color-neutral-content: #ffffff;
+  
+  --color-info: #17a2b8;
+  --color-success: #28a745;
+  --color-warning: #ffc107;
+  --color-warning-content: #000000;
+  --color-error: #dc3545;
+  --color-error-content: #ffffff;
+}
+
+@plugin "daisyui/theme" {
+  name: "forest";
+  color-scheme: dark;
+  
+  /* Dark theme with inverted green scheme */
+  --color-base-100: #1a1a1a;
+  --color-base-200: #2d2d2d;
+  --color-base-300: #404040;
+  --color-base-400: #1c4a29; /* Using your dark green here */
+  --color-base-content: #e9ecef; /* Light text */
+  
+  --color-primary: #81e59d; /* Your light green becomes primary */
+  --color-primary-content: #0e2a17; /* Dark text on light green */
+  
+  --color-secondary: #4caf7a; /* Medium-light green */
+  --color-secondary-content: #ffffff;
+  
+  --color-accent: #00924b; /* Your medium green */
+  --color-accent-content: #ffffff;
+  
+  --color-neutral: #adb5bd;
+  --color-neutral-content: #ffffff;
+  
+  --color-info: #3abff8;
+  --color-info-content: #ffffff;
+  --color-success: #36d399;
+  --color-success-content: #000000;
+  --color-warning: #fbbd23;
+  --color-warning-content: #000000;
+  --color-error: #f87272;
+  --color-error-content: #ffffff;
+}
+
+@theme {
+  --font-aladin: Aladin;
+}
+
+body {
+  font-family: poppins;
+}
+
+a.active {
+  @apply text-primary; 
+}
