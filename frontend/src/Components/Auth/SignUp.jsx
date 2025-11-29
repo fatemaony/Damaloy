@@ -8,6 +8,7 @@ import Swal from 'sweetalert2';
 import useAuth from '../../Hooks/useAuth';
 import useAxios from '../../Hooks/useAxios';
 
+
 const SignUp = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -55,7 +56,6 @@ const SignUp = () => {
       const imgbbData = await imgbbResponse.json();
       
       if (imgbbData.success) {
-        // SUCCESS: returns the publicly accessible URL
         return imgbbData.data.url;
       } else {
         throw new Error('ImgBB response success is false: ' + imgbbData.error.message);
@@ -72,66 +72,45 @@ const SignUp = () => {
     let photoUrl = '';
 
     try {
-      
       const imageFile = data.photo[0]; 
+      
       if (imageFile) {
-        // STEP 1: Upload image and get the URL
         photoUrl = await uploadImageToImgBB(imageFile); 
-        
-        if (!photoUrl) {
-          throw new Error('Image upload failed to return a URL.');
-        }
       }
 
-      // STEP 2: Create user in Firebase/Auth system
-      await createUser(data.email, data.password);
-        
-      // STEP 3: Prepare userData, INCLUDING the obtained photoUrl
+      
+      const result = await createUser(data.email, data.password);
+      
+      
       const userData = {
         name: data.fullName,
         email: data.email,
-        image: photoUrl // This is the image URL being sent to the backend
+        photo_url: photoUrl, 
+        role: 'user'
       };
 
-      // STEP 4: Post user data (with URL) to your backend
+
       const backendResponse = await axiosInstance.post('/api/users', userData);
       
-      console.log('User saved to backend:', backendResponse.data);
-      
-    
       if (!backendResponse.data.success) {
         throw new Error('Failed to create user in database');
       }
       
       Swal.fire({
         title: 'Welcome! 🎉',
-        text: 'Your account has been created successfully.',
+        text: 'Account created successfully.',
         icon: 'success',
         confirmButtonText: 'Go to Home',
-        buttonsStyling: false,
-        customClass: {
-          confirmButton: 'btn btn-primary'
-        }
       }).then(() => {
         navigate('/');
       });
 
     } catch (error) {
-      console.error('Signup Process Error:', error);
-      
-      let errorMessage = 'Signup failed. Please try again.';
-      
-      if (error.response?.data?.message) {
-        errorMessage = error.response.data.message;
-      } else if (error?.message) {
-        errorMessage = error.message;
-      }
-
+      console.error('Signup Error:', error);
       Swal.fire({
         title: 'Error',
-        text: errorMessage,
+        text: error.message || 'Signup failed',
         icon: 'error',
-        confirmButtonText: 'Try Again'
       });
     } finally {
       setIsSubmitting(false);

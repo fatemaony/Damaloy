@@ -1,15 +1,17 @@
 import express from 'express';
 import helmet from 'helmet';
-import morgan from 'morgan'; 
-import cors from 'cors'; 
+import morgan from 'morgan';
+import cors from 'cors';
 import dotenv from 'dotenv'
-import { sql } from './config/db.js'; 
+import { sql } from './config/db.js';
 import { ajt } from './lib/arcjet.js';
 import userRoute from './routes/userRoute.js';
+import sellerRoute from './routes/sellerRoute.js';
+import productRoute from './routes/productRoute.js';
 
 dotenv.config()
 const app = express();
-const PORT= process.env.PORT || 3000;
+const PORT = process.env.PORT || 3000;
 
 app.set('trust proxy', true);
 
@@ -40,7 +42,9 @@ app.use(async (req, res, next) => {
 })
 
 
-app.use("/api/users",userRoute);
+app.use("/api/users", userRoute);
+app.use("/api/sellers", sellerRoute);
+app.use("/api/products", productRoute);
 
 async function initDB() {
 
@@ -55,17 +59,46 @@ async function initDB() {
     photo_url TEXT,
     role VARCHAR(50) DEFAULT 'user' NOT NULL, -- 'admin', 'vendor', 'user'
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-)`;
+    )`;
 
-    console.log("DB Initialized Successfully" )
-    
+    // sellers table
+    await sql`
+    CREATE TABLE IF NOT EXISTS sellers (
+      id SERIAL PRIMARY KEY,
+      user_id INTEGER REFERENCES users(user_id) ON DELETE CASCADE,
+      seller_email VARCHAR(255) NOT NULL,
+      store_name VARCHAR(255) NOT NULL,
+      store_category VARCHAR(100) NOT NULL,
+      store_description TEXT,
+      location VARCHAR(255) NOT NULL,
+      phone VARCHAR(50) NOT NULL,
+      status VARCHAR(50) DEFAULT 'pending', -- 'pending', 'approved', 'rejected'
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )`;
+    // products table
+    await sql`
+    CREATE TABLE IF NOT EXISTS products (
+      id SERIAL PRIMARY KEY,
+      seller_id INTEGER REFERENCES sellers(id) ON DELETE CASCADE,
+      name VARCHAR(255) NOT NULL,
+      image TEXT,
+      price DECIMAL(10, 2) NOT NULL,
+      unit VARCHAR(50) NOT NULL,
+      description TEXT,
+      quantity INTEGER DEFAULT 0,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )`;
+
+    console.log("DB Initialized Successfully")
+
   } catch (error) {
-    console.log("Error initDB",error)
+    console.log("Error initDB", error)
   }
 }
-initDB().then(()=>{
-  app.listen(PORT, ()=>{
-    console.log("damaloy backend server running on port",PORT)
+initDB().then(() => {
+  app.listen(PORT, () => {
+    console.log("damaloy backend server running on port", PORT)
   });
 })
 

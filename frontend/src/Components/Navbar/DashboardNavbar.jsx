@@ -1,19 +1,24 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { IoHomeOutline } from "react-icons/io5";
+import { IoHomeOutline, IoPaperPlaneOutline } from "react-icons/io5";
+import { MdPointOfSale } from "react-icons/md";
+import { LuBaggageClaim } from "react-icons/lu";
+import { AiOutlineProduct } from "react-icons/ai";
 import { 
-  FiTrendingUp, FiList, FiShoppingBag, FiPlusSquare, 
-  FiPackage, FiSpeaker, FiUsers,  
-  FiShoppingCart, FiUser, FiLogOut, 
-
+  FiList, FiShoppingBag,
+  FiUsers, 
 } from 'react-icons/fi';
+import { RiAdvertisementFill } from "react-icons/ri";
 import { Link, NavLink, useLocation } from 'react-router';
+import LogoImage from '../../assets/Logo.png';
 import useAuth from '../../Hooks/useAuth';
-
+import useUserRole from '../../Hooks/useUserRole';
+import { FaCartPlus, FaShoppingCart } from 'react-icons/fa';
 
 
 const DashboardLink = () => {
   const { user, SignOut } = useAuth(); 
+  const { role } = useUserRole();
   const location = useLocation();
 
   // Animation variants
@@ -21,9 +26,7 @@ const DashboardLink = () => {
     hidden: { opacity: 0 },
     show: {
       opacity: 1,
-      transition: {
-        staggerChildren: 0.1
-      }
+      transition: { staggerChildren: 0.1 }
     }
   };
 
@@ -32,97 +35,100 @@ const DashboardLink = () => {
     show: { opacity: 1, x: 0 }
   };
 
-  const handleSignOut = () => {
-    SignOut()
-      .then(() => console.log("Sign out successfully"))
-      .catch(error => console.log(error));
-  };
   // Role-based navigation links
   const getNavLinks = () => {
-    if (!user || !role || !seller) return [];
+    if (!user || !role) return [];
 
-    const commonLinks = [
-      
-    ];
+ 
+    const commonLinks = [];
 
     const userLinks = [
       { path: '/dashboard/user', name: 'Home', icon: <IoHomeOutline className='text-lg' />},
       { path: '/dashboard/user/addToCart', name: 'My Cart', icon: <FiList className="text-lg" /> },
       { path: "/dashboard/user/myOrders", name: 'My Orders', icon: <FiShoppingBag className="text-lg" /> },
-      
     ];
+
     const sellerLinks = [
       { path: '/dashboard/seller', name: 'Home', icon: <IoHomeOutline className='text-lg' />},
-      { path: '/dashboard/seller/addProducts', name: 'Add new Product', icon: <FiList className="text-lg" /> },
-      { path: "/dashboard/seller/myProducts", name: 'My All Products', icon: <FiShoppingBag className="text-lg" /> },
-      { path: "/dashboard/seller/postAdvertisement", name: 'Add Advertisement', icon: <FiShoppingBag className="text-lg" /> },
-      { path: "/dashboard/seller/myAdvertisement", name: 'All Advertisement', icon: <FiShoppingBag className="text-lg" /> },
-       { path: "/dashboard/seller/sells", name: 'Sells Products', icon: <FiShoppingBag className="text-lg" /> }
-      
+      { path: '/dashboard/seller/addProducts', name: 'Add Products', icon: <FaCartPlus className="text-lg" /> },
+      { path: "/dashboard/seller/myProducts", name: 'My Products', icon: <FaShoppingCart className="text-lg" /> },
+      { path: "/dashboard/seller/postAdvertisement", name: 'Post Ad', icon: <RiAdvertisementFill className="text-lg" /> },
+      { path: "/dashboard/seller/myAdvertisement", name: 'My Ads', icon:  <RiAdvertisementFill className="text-lg" />},
+      { path: "/dashboard/seller/sells", name: 'Sales', icon: <MdPointOfSale /> },
     ];
 
     const adminLinks = [
       { path: '/dashboard/admin', name: 'Home', icon: <IoHomeOutline className='text-lg' />},
-      { path: '/dashboard/admin/allProducts', name: 'All Products', icon: <FiPackage className="text-lg" /> },
-      { path: '/dashboard/admin/allsellers', name: 'All Sellers', icon: <FiPackage className="text-lg" /> },
-      { path: '/dashboard/Admin/allOrders', name: 'All Orders', icon: <FiShoppingCart className="text-lg" /> },
+      { path: '/dashboard/admin/allApplications', name: 'Applications', icon: <IoPaperPlaneOutline className="text-lg" />},
+      { path: '/dashboard/admin/allSellers', name: 'All Sellers', icon:<FiUsers className="text-lg" />  },
+       { path: '/dashboard/admin/allProducts', name: 'All Products', icon: <LuBaggageClaim className="text-lg" /> },
+      { path: '/dashboard/admin/allOrders', name: 'All Orders', icon: <AiOutlineProduct className="text-lg" />},
       { path: '/dashboard/admin/allUsers', name: 'All Users', icon: <FiUsers className="text-lg" /> },
+     
     ];
 
-    let roleLinks = [];
-    if (role && role.toLowerCase() === 'admin') {
-      roleLinks = [...adminLinks];
-    } else {
-      roleLinks = [...userLinks];
-    }
+    const userRole = role.toLowerCase();
 
-    return [...roleLinks, ...commonLinks];
+    if (userRole === 'admin') return [...adminLinks, ...commonLinks];
+    if (userRole === 'seller') return [...sellerLinks, ...commonLinks];
+    return [...userLinks, ...commonLinks];
   };
 
   const navLinks = getNavLinks();
 
+  // Loading State
   if (!user || !role) {
-    return <div className="flex flex-col h-full bg-base-200 text-base-content p-4">Loading...</div>;
+    return (
+      <div className="flex items-center justify-center h-full bg-base-200 text-base-content">
+        <span className="loading loading-spinner loading-md"></span>
+      </div>
+    );
   }
 
   return (
     <motion.div 
-      className="flex flex-col shadow-lg p-5 h-full bg-base-300 text-base-content"
+      className="flex flex-col h-full shadow-lg bg-base-300 text-base-content"
       initial="hidden"
       animate="show"
       variants={containerVariants}
     >
-      <Link to={"/"}>
-      <div className='flex items-center justify-center mx-10'>
-      <img className='w-20 h-20' src={logoPicture} alt="logo" /> 
-       
-      <div className="text-primary ">
-        <h1 className="text-3xl font-bold">
-          {role && role.toLowerCase() === 'admin' ? 'Admin' : 
-           role && role.toLowerCase() === 'vendor' ? 'Vendor Dashboard' : 'Dashboard'}
-        </h1>
+      {/* --- Header / Logo Section --- */}
+      <div className="p-6">
+        <Link to={"/"} className="flex flex-col items-center justify-center gap-2">
+          <img src={LogoImage} alt="Logo" className="w-12 h-12 object-contain" />
+          <div className="text-primary text-center">
+            <h1 className="text-2xl font-bold uppercase tracking-wide">
+              {role}
+            </h1>
+            <span className="text-xs opacity-70">Dashboard</span>
+          </div>
+        </Link>
       </div>
-      </div>
-      </Link>
 
-      <nav className="flex-1 p-4 overflow-y-auto">
+      {/* --- Navigation Links --- */}
+      <nav className="flex-1 lg:px-10 ">
         <motion.ul className="space-y-2" variants={containerVariants}>
           {navLinks.map((link) => (
             <motion.li key={link.path} variants={itemVariants}>
               <NavLink
                 to={link.path}
+                end={link.path.split('/').length <= 3} 
                 className={({ isActive }) => 
-                  `flex items-center p-3 rounded-lg transition-all relative ${isActive ? 
-                    'bg-primary text-primary-content shadow-md' : 
-                    'hover:bg-base-300 hover:text-base-content'}`
+                  `flex items-center px-4 py-3 rounded-lg transition-all duration-200 relative overflow-hidden group ${
+                    isActive 
+                      ? 'bg-primary text-primary-content shadow-md font-medium' 
+                      : 'hover:bg-base-100 hover:text-base-content'
+                  }`
                 }
               >
-                <span className="mr-3">{link.icon}</span>
-                <span>{link.name}</span>
+                <span className="mr-3 relative z-10">{link.icon}</span>
+                <span className="relative z-10">{link.name}</span>
+                
+                {/* Active Indicator Dot */}
                 {location.pathname === link.path && (
                   <motion.span 
                     layoutId="navActive"
-                    className="absolute right-4 w-2 h-2 bg-accent rounded-full"
+                    className="absolute right-3 w-2 h-2 bg-accent rounded-full z-10"
                     transition={{ type: 'spring', stiffness: 500, damping: 30 }}
                   />
                 )}
@@ -132,17 +138,8 @@ const DashboardLink = () => {
         </motion.ul>
       </nav>
 
-      <div className="p-4 border-t border-base-300">
-        <motion.button
-          onClick={()=>handleSignOut()}
-          className="flex items-center w-full p-3 rounded-lg bg-error text-error-content transition-all"
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
-        >
-          <FiLogOut className="mr-3 text-lg" />
-          <span>Logout</span>
-        </motion.button>
-      </div>
+     
+
     </motion.div>
   );
 };
