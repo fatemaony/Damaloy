@@ -8,6 +8,10 @@ import { ajt } from './lib/arcjet.js';
 import userRoute from './routes/userRoute.js';
 import sellerRoute from './routes/sellerRoute.js';
 import productRoute from './routes/productRoute.js';
+import reviewRoute from './routes/reviewRoute.js';
+import cartRoute from './routes/cartRoute.js';
+import orderRoute from './routes/orderRoute.js';
+import adminRoute from './routes/adminRoute.js';
 
 dotenv.config()
 const app = express();
@@ -45,6 +49,10 @@ app.use(async (req, res, next) => {
 app.use("/api/users", userRoute);
 app.use("/api/sellers", sellerRoute);
 app.use("/api/products", productRoute);
+app.use("/api/reviews", reviewRoute);
+app.use("/api/cart", cartRoute);
+app.use("/api/orders", orderRoute);
+app.use("/api/admin", adminRoute);
 
 async function initDB() {
 
@@ -58,8 +66,16 @@ async function initDB() {
     email VARCHAR(255) UNIQUE NOT NULL,
     photo_url TEXT,
     role VARCHAR(50) DEFAULT 'user' NOT NULL, -- 'admin', 'vendor', 'user'
+    address TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )`;
+
+    // Add address column if it doesn't exist (migration)
+    try {
+      await sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS address TEXT`;
+    } catch (e) {
+      console.log("Column address might already exist or error adding it:", e.message);
+    }
 
     // sellers table
     await sql`
@@ -75,6 +91,7 @@ async function initDB() {
       status VARCHAR(50) DEFAULT 'pending', -- 'pending', 'approved', 'rejected'
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )`;
+
     // products table
     await sql`
     CREATE TABLE IF NOT EXISTS products (
@@ -88,6 +105,60 @@ async function initDB() {
       quantity INTEGER DEFAULT 0,
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
       updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )`;
+
+    // reviews table
+    await sql`
+    CREATE TABLE IF NOT EXISTS reviews (
+      id SERIAL PRIMARY KEY,
+      product_id INTEGER REFERENCES products(id) ON DELETE CASCADE,
+      user_id INTEGER REFERENCES users(user_id) ON DELETE CASCADE,
+      rating INTEGER CHECK (rating >= 1 AND rating <= 5),
+      comment TEXT,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )`;
+
+    // price_history table
+    await sql`
+    CREATE TABLE IF NOT EXISTS price_history (
+      id SERIAL PRIMARY KEY,
+      product_id INTEGER REFERENCES products(id) ON DELETE CASCADE,
+      price DECIMAL(10, 2) NOT NULL,
+      changed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )`;
+
+    // carts table
+    await sql`
+    CREATE TABLE IF NOT EXISTS carts (
+      id SERIAL PRIMARY KEY,
+      user_id INTEGER REFERENCES users(user_id) ON DELETE CASCADE,
+      product_id INTEGER REFERENCES products(id) ON DELETE CASCADE,
+      quantity INTEGER DEFAULT 1,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )`;
+
+    // orders table
+    await sql`
+    CREATE TABLE IF NOT EXISTS orders (
+      id SERIAL PRIMARY KEY,
+      user_id INTEGER REFERENCES users(user_id) ON DELETE CASCADE,
+      total_amount DECIMAL(10, 2) NOT NULL,
+      payment_method VARCHAR(50) NOT NULL, -- 'stripe', 'cod'
+      payment_status VARCHAR(50) DEFAULT 'pending', -- 'pending', 'paid', 'failed'
+      order_status VARCHAR(50) DEFAULT 'pending', -- 'pending', 'processing', 'shipped', 'delivered', 'cancelled'
+      shipping_address TEXT NOT NULL,
+      stripe_payment_intent_id VARCHAR(255),
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )`;
+
+    // order_items table
+    await sql`
+    CREATE TABLE IF NOT EXISTS order_items (
+      id SERIAL PRIMARY KEY,
+      order_id INTEGER REFERENCES orders(id) ON DELETE CASCADE,
+      product_id INTEGER REFERENCES products(id) ON DELETE CASCADE,
+      quantity INTEGER NOT NULL,
+      price DECIMAL(10, 2) NOT NULL
     )`;
 
     console.log("DB Initialized Successfully")

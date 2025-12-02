@@ -7,6 +7,17 @@ const AllSellers = () => {
   const [sellers, setSellers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [selectedCategory, setSelectedCategory] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 5;
+
+  const categories = [
+    "Fruits", "Vegetable", "Grocery", "Departmental", "Super Market", "Meat", "Other"
+  ];
+
+  const filteredSellers = selectedCategory
+    ? sellers.filter(seller => seller.store_category === selectedCategory)
+    : sellers;
 
   const axiosInstance = useAxios();
 
@@ -28,6 +39,19 @@ const AllSellers = () => {
   useEffect(() => {
     fetchSellers();
   }, [axiosInstance]);
+
+  // Pagination logic
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentItems = filteredSellers.slice(indexOfFirstItem, indexOfLastItem);
+  const totalPages = Math.ceil(filteredSellers.length / itemsPerPage);
+
+  const paginate = (pageNumber) => setCurrentPage(pageNumber);
+
+  // Reset to first page when category changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [selectedCategory]);
 
   const handleDelete = async (id) => {
     Swal.fire({
@@ -83,9 +107,25 @@ const AllSellers = () => {
   return (
     <div className="p-6 bg-gray-50 min-h-screen">
       <div className="max-w-7xl mx-auto">
-        <h2 className="text-3xl font-bold text-primary mb-6">All Sellers</h2>
+        <div className="flex flex-col md:flex-row justify-between items-center mb-6">
+          <h2 className="text-3xl font-bold text-primary">All Sellers</h2>
+          {/* Filter Section */}
+          <div className="w-full max-w-xs mt-4 md:mt-0">
+            <select
+              className="select select-bordered w-full"
+              value={selectedCategory}
+              onChange={(e) => setSelectedCategory(e.target.value)}
+            >
+              <option value="">All Categories</option>
+              {categories.map((category) => (
+                <option key={category} value={category}>{category}</option>
+              ))}
+            </select>
+          </div>
+        </div>
 
         <div className="overflow-x-auto bg-white rounded-lg shadow">
+
           <table className="table w-full">
             {/* head */}
             <thead className="bg-green-100 text-gray-700">
@@ -100,16 +140,16 @@ const AllSellers = () => {
               </tr>
             </thead>
             <tbody>
-              {sellers.length === 0 ? (
+              {currentItems.length === 0 ? (
                 <tr>
                   <td colSpan="7" className="text-center py-8 text-gray-500">
                     No sellers found.
                   </td>
                 </tr>
               ) : (
-                sellers.map((seller, index) => (
+                currentItems.map((seller, index) => (
                   <tr key={seller.id} className="hover:bg-gray-50 transition-colors">
-                    <th>{index + 1}</th>
+                    <th>{indexOfFirstItem + index + 1}</th>
                     <td className="font-medium text-gray-900">{seller.store_name}</td>
                     <td className="text-gray-600">{seller.seller_email}</td>
                     <td>
@@ -131,6 +171,37 @@ const AllSellers = () => {
               )}
             </tbody>
           </table>
+
+          {/* Pagination Controls */}
+          {filteredSellers.length > itemsPerPage && (
+            <div className="flex justify-center py-4">
+              <div className="btn-group">
+                <button
+                  className="btn btn-sm"
+                  onClick={() => paginate(currentPage - 1)}
+                  disabled={currentPage === 1}
+                >
+                  «
+                </button>
+                {[...Array(totalPages)].map((_, i) => (
+                  <button
+                    key={i}
+                    className={`btn btn-sm ${currentPage === i + 1 ? 'btn-active' : ''}`}
+                    onClick={() => paginate(i + 1)}
+                  >
+                    {i + 1}
+                  </button>
+                ))}
+                <button
+                  className="btn btn-sm"
+                  onClick={() => paginate(currentPage + 1)}
+                  disabled={currentPage === totalPages}
+                >
+                  »
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>

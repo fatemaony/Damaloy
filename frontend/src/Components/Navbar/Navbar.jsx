@@ -3,22 +3,29 @@ import { Link } from 'react-router'
 import { FaTachometerAlt, FaStore, FaSignOutAlt } from 'react-icons/fa';
 import Swal from 'sweetalert2'
 import useAuth from '../../Hooks/useAuth'
+import useUserRole from '../../Hooks/useUserRole'
 import useAxios from '../../Hooks/useAxios'
 import Logo from '../Logo/Logo'
 
 const Navbar = () => {
+  const { user, loading, signOutUser } = useAuth();
+  const { role } = useUserRole();
+  const axiosInstance = useAxios();
+  const [dbUser, setDbUser] = React.useState(null);
+
   const navItems = <>
     <Link to={"/"}><li className='text-secondary font-bold hover:underline px-5'>Home</li></Link>
     <Link to={"/products"}><li className='text-secondary font-bold hover:underline px-5'>Products</li></Link>
+    {user && role === 'user' && (
+      <>
+        <Link to={"/my-cart"}><li className='text-secondary font-bold hover:underline px-5'>My Cart</li></Link>
+        <Link to={"/my-orders"}><li className='text-secondary font-bold hover:underline px-5'>My Orders</li></Link>
+      </>
+    )}
     <Link to={"/about"}><li className='text-secondary font-bold hover:underline px-5'>About</li></Link>
     <Link to={"/contact"}><li className='text-secondary font-bold hover:underline px-5'>Contact</li></Link>
   </>
 
-  const { user, loading, signOutUser } = useAuth();
-  const axiosInstance = useAxios();
-  const [dbUser, setDbUser] = React.useState(null);
-
-  
   React.useEffect(() => {
     const fetchUserData = async () => {
       if (user?.email) {
@@ -44,7 +51,7 @@ const Navbar = () => {
         text: "You won't be able to revert this!",
         icon: "warning",
         showCancelButton: true,
-        confirmButtonColor: "#d97706",
+        confirmButtonColor: "#17671fff",
         cancelButtonColor: "#d33",
         confirmButtonText: "Sign Out"
       }).then((result) => {

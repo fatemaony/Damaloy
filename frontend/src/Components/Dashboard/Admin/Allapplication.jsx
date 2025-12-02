@@ -34,7 +34,7 @@ const Allapplication = () => {
       text: `Do you want to ${newStatus} this application?`,
       icon: 'warning',
       showCancelButton: true,
-      confirmButtonColor: '#3085d6',
+      confirmButtonColor: '#21692eff',
       cancelButtonColor: '#d33',
       confirmButtonText: `Yes, ${newStatus} it!`
     });
@@ -56,7 +56,8 @@ const Allapplication = () => {
           Swal.fire(
             'Updated!',
             `Application has been ${newStatus}.`,
-            'success'
+            'success',
+            'text-primary'
           );
         }
       } catch (err) {

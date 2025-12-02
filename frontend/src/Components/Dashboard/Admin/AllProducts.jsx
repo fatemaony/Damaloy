@@ -7,6 +7,29 @@ const AllProducts = () => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 5;
+
+  const filteredProducts = products.filter(product => {
+    const term = searchTerm.toLowerCase();
+    const productName = product.name?.toLowerCase() || '';
+    const storeName = product.store_name?.toLowerCase() || '';
+    return productName.includes(term) || storeName.includes(term);
+  });
+
+  // Pagination logic
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentItems = filteredProducts.slice(indexOfFirstItem, indexOfLastItem);
+  const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
+
+  const paginate = (pageNumber) => setCurrentPage(pageNumber);
+
+  // Reset to first page when search changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm]);
 
   const axiosInstance = useAxios();
 
@@ -83,7 +106,33 @@ const AllProducts = () => {
   return (
     <div className="p-6 bg-gray-50 min-h-screen">
       <div className="max-w-7xl mx-auto">
-        <h2 className="text-3xl font-bold text-primary mb-6">All Products</h2>
+        <div className="flex flex-col md:flex-row justify-between items-center mb-6">
+          <h2 className="text-3xl font-bold text-primary">All Products</h2>
+          {/* Search Section */}
+          <div className="relative w-full max-w-xs mt-4 md:mt-0">
+            <input
+              type="text"
+              placeholder="Search by product or store..."
+              className="input input-bordered w-full pl-10"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-5 w-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+              />
+            </svg>
+          </div>
+        </div>
 
         <div className="overflow-x-auto bg-white rounded-lg shadow">
           <table className="table w-full">
@@ -100,16 +149,16 @@ const AllProducts = () => {
               </tr>
             </thead>
             <tbody>
-              {products.length === 0 ? (
+              {currentItems.length === 0 ? (
                 <tr>
                   <td colSpan="7" className="text-center py-8 text-gray-500">
                     No products found.
                   </td>
                 </tr>
               ) : (
-                products.map((product, index) => (
+                currentItems.map((product, index) => (
                   <tr key={product.id} className="hover:bg-gray-50 transition-colors">
-                    <th>{index + 1}</th>
+                    <th>{indexOfFirstItem + index + 1}</th>
                     <td>
                       <div className="avatar">
                         <div className="mask mask-box w-12 h-12">
@@ -139,6 +188,37 @@ const AllProducts = () => {
               )}
             </tbody>
           </table>
+
+          {/* Pagination Controls */}
+          {filteredProducts.length > itemsPerPage && (
+            <div className="flex justify-center py-4">
+              <div className="btn-group">
+                <button
+                  className="btn btn-sm"
+                  onClick={() => paginate(currentPage - 1)}
+                  disabled={currentPage === 1}
+                >
+                  «
+                </button>
+                {[...Array(totalPages)].map((_, i) => (
+                  <button
+                    key={i}
+                    className={`btn btn-sm ${currentPage === i + 1 ? 'btn-active' : ''}`}
+                    onClick={() => paginate(i + 1)}
+                  >
+                    {i + 1}
+                  </button>
+                ))}
+                <button
+                  className="btn btn-sm"
+                  onClick={() => paginate(currentPage + 1)}
+                  disabled={currentPage === totalPages}
+                >
+                  »
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>

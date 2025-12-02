@@ -1,8 +1,13 @@
 import React from 'react'
+import Banner from './Banner'
+import OurProducts from './OurProducts'
 
 const Home = () => {
   return (
-    <div>Home</div>
+    <div>
+      <Banner />
+      <OurProducts />
+    </div>
   )
 }
 

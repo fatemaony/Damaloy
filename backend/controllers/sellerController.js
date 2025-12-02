@@ -145,9 +145,17 @@ export const deleteSeller = async (req, res) => {
       return res.status(404).json({ success: false, message: "Seller not found" });
     }
 
+    // Revert user role to 'user'
+    const userId = deletedSeller[0].user_id;
+    await sql`
+      UPDATE users
+      SET role = 'user'
+      WHERE user_id = ${userId}
+    `;
+
     res.status(200).json({
       success: true,
-      message: "Seller deleted successfully"
+      message: "Seller deleted successfully and user role reverted to 'user'"
     });
   } catch (error) {
     console.error("Error deleting seller:", error);

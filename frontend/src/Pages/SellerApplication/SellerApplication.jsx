@@ -71,7 +71,9 @@ const SellerApplication = () => {
           title: 'Application Submitted! 🎉',
           text: 'Your application to become a seller is pending approval.',
           icon: 'success',
-          confirmButtonText: 'Go to Home'
+          confirmButtonText: 'Go to Home',
+          buttonsStyling: false,
+          customClass: { confirmButton: 'btn btn-primary' }
         }).then(() => {
           navigate('/');
         });
@@ -81,7 +83,9 @@ const SellerApplication = () => {
       Swal.fire({
         title: 'Error',
         text: error.response?.data?.message || 'Failed to submit application.',
-        icon: 'error'
+        icon: 'error',
+        buttonsStyling: false,
+        customClass: { confirmButton: 'btn btn-primary' }
       });
     } finally {
       setIsSubmitting(false);
@@ -163,6 +167,9 @@ const SellerApplication = () => {
                 <option value="Grocery">Grocery</option>
                 <option value="Departmental">Departmental</option>
                 <option value="Super Market">Super Market</option>
+                <option value="Fruits">Fruits</option>
+                <option value="Meat">Meat</option>
+                <option value="Other">Other</option>
               </select>
               {errors.storeCategory && (
                 <p className="text-error text-sm mt-1">{errors.storeCategory.message}</p>

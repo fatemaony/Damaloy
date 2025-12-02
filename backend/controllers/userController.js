@@ -69,7 +69,7 @@ export const getUserByEmail = async (req, res) => {
     const { email } = req.params;
 
     const user = await sql`
-      SELECT user_id as id, name, email, photo_url , role, created_at 
+      SELECT user_id as id, name, email, photo_url , role, address, created_at 
       FROM users 
       WHERE email = ${email}
     `;
@@ -156,3 +156,26 @@ export const updateUser = async (req, res) => {
     res.status(500).json({ success: false, message: error.message });
   }
 }
+
+export const updateAddress = async (req, res) => {
+  const { id } = req.params;
+  const { address } = req.body;
+
+  try {
+    const updatedUser = await sql`
+      UPDATE users
+      SET address = ${address}
+      WHERE user_id = ${id}
+      RETURNING *
+    `;
+
+    if (updatedUser.length === 0) {
+      return res.status(404).json({ success: false, message: "User not found" });
+    }
+
+    res.status(200).json({ success: true, data: updatedUser[0] });
+  } catch (error) {
+    console.error("Error updating address:", error);
+    res.status(500).json({ success: false, message: "Internal server error" });
+  }
+};

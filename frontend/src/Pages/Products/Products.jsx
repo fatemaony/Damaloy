@@ -9,22 +9,28 @@ const Products = () => {
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
   const axiosInstance = useAxios();
   const categories = [
-    "Fruits", "Vegetables", "Dairy", "Bakery", "Meat", "Beverages", "Snacks", "Other"
+    "Fruits", "Vegetable", "Grocery", "Departmental", "Super Market", "Meat", "Other"
   ];
 
   useEffect(() => {
     const fetchProducts = async () => {
       setLoading(true);
       try {
-        const params = {};
+        const params = {
+          page,
+          limit: 12
+        };
         if (searchTerm) params.search = searchTerm;
         if (selectedCategory) params.category = selectedCategory;
 
         const response = await axiosInstance.get('/api/products', { params });
         if (response.data.success) {
           setProducts(response.data.data);
+          setTotalPages(response.data.pagination.totalPages);
         }
       } catch (err) {
         console.error("Error fetching products:", err);
@@ -40,7 +46,7 @@ const Products = () => {
     }, 500);
 
     return () => clearTimeout(timeoutId);
-  }, [axiosInstance, searchTerm, selectedCategory]);
+  }, [axiosInstance, searchTerm, selectedCategory, page]);
 
   return (
     <div className="min-h-screen bg-gray-50 py-10 px-4 sm:px-6 lg:px-15">
@@ -110,8 +116,46 @@ const Products = () => {
             ))}
           </div>
         )}
+
+        {/* Pagination Controls */}
+        {!loading && !error && products.length > 0 && (
+          <div className="flex justify-center mt-12">
+            <div className="flex items-center space-x-2">
+              <button
+                onClick={() => setPage(prev => Math.max(prev - 1, 1))}
+                disabled={page === 1}
+                className="px-4 py-2 border border-gray-300 rounded-lg disabled:opacity-50 hover:bg-gray-50 transition-colors"
+              >
+                Previous
+              </button>
+
+              <div className="flex items-center space-x-1">
+                {[...Array(totalPages)].map((_, i) => (
+                  <button
+                    key={i + 1}
+                    onClick={() => setPage(i + 1)}
+                    className={`w-10 h-10 rounded-lg flex items-center justify-center transition-colors ${page === i + 1
+                      ? 'bg-primary text-white'
+                      : 'border border-gray-300 hover:bg-gray-50'
+                      }`}
+                  >
+                    {i + 1}
+                  </button>
+                ))}
+              </div>
+
+              <button
+                onClick={() => setPage(prev => Math.min(prev + 1, totalPages))}
+                disabled={page === totalPages}
+                className="px-4 py-2 border border-gray-300 rounded-lg disabled:opacity-50 hover:bg-gray-50 transition-colors"
+              >
+                Next
+              </button>
+            </div>
+          </div>
+        )}
       </div>
-    </div>
+    </div >
   );
 };
 

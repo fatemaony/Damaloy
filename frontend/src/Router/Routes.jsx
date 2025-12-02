@@ -6,7 +6,6 @@ import AuthLayout from "../Layouts/AuthLayout";
 import SignIn from "../Components/Auth/SignIn";
 import SellerApplication from "../Pages/SellerApplication/SellerApplication";
 import DashboardLayout from "../Layouts/DashboardLayout";
-import DashboardRedirect from "../Components/Dashboard/DashboardRedirect";
 import AdminHome from "../Components/Dashboard/Admin/AdminHome";
 import SellerHome from "../Components/Dashboard/Seller/SellerHome";
 import UserHome from "../Components/Dashboard/User/UserHome";
@@ -23,6 +22,9 @@ import MyCart from "../Components/Dashboard/User/MyCart";
 import MyOrders from "../Components/Dashboard/User/MyOrders";
 import Allapplication from "../Components/Dashboard/Admin/Allapplication";
 import Products from "../Pages/Products/Products";
+import ProductDetails from "../Pages/Products/ProductDetails";
+import UpdateProduct from "../Components/Dashboard/Seller/UpdateProduct";
+import Checkout from "../Pages/Checkout/Checkout";
 
 export const router = createBrowserRouter([
   {
@@ -40,6 +42,22 @@ export const router = createBrowserRouter([
       {
         path: "products",
         Component: Products
+      },
+      {
+        path: "product/:id",
+        Component: ProductDetails
+      },
+      {
+        path: "my-cart",
+        Component: MyCart
+      },
+      {
+        path: "checkout",
+        Component: Checkout
+      },
+      {
+        path: "my-orders",
+        Component: MyOrders
       }
     ]
   },
@@ -54,7 +72,8 @@ export const router = createBrowserRouter([
       {
         path: "signUp",
         Component: SignUp
-      }
+      },
+
     ]
   },
   {
@@ -96,6 +115,10 @@ export const router = createBrowserRouter([
       {
         path: "seller/myProducts",
         Component: MyProducts
+      },
+      {
+        path: "seller/updateProduct/:id",
+        Component: UpdateProduct
       },
       {
         path: "seller/postAdvertisement",
