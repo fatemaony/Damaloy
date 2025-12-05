@@ -27,6 +27,7 @@ import Products from "../Pages/Products/Products";
 import ProductDetails from "../Pages/Products/ProductDetails";
 import UpdateProduct from "../Components/Dashboard/Seller/UpdateProduct";
 import Checkout from "../Pages/Checkout/Checkout";
+import NotFound from "../Pages/NotFound/NotFound";
 
 export const router = createBrowserRouter([
   {
@@ -68,7 +69,8 @@ export const router = createBrowserRouter([
       {
         path: "my-orders",
         Component: MyOrders
-      }
+      },
+      
     ]
   },
   {
@@ -159,5 +161,10 @@ export const router = createBrowserRouter([
         Component: MyOrders
       }
     ]
+  }
+  ,
+  {
+        path: "*",
+        Component: NotFound
   }
 ]);
