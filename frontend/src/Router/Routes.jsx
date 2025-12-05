@@ -5,6 +5,8 @@ import SignUp from "../Components/Auth/SignUp";
 import AuthLayout from "../Layouts/AuthLayout";
 import SignIn from "../Components/Auth/SignIn";
 import SellerApplication from "../Pages/SellerApplication/SellerApplication";
+import Abouts from "../Pages/Abouts/Abouts";
+import Contact from "../Pages/Contacts/Contact";
 import DashboardLayout from "../Layouts/DashboardLayout";
 import AdminHome from "../Components/Dashboard/Admin/AdminHome";
 import SellerHome from "../Components/Dashboard/Seller/SellerHome";
@@ -38,6 +40,14 @@ export const router = createBrowserRouter([
       {
         path: "become-seller",
         Component: SellerApplication
+      },
+      {
+        path: "about",
+        Component: Abouts
+      },
+      {
+        path: "contact",
+        Component: Contact
       },
       {
         path: "products",

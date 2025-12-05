@@ -175,11 +175,20 @@ async function initDB() {
     console.log("Error initDB", error)
   }
 }
-initDB().then(() => {
-  app.listen(PORT, () => {
-    console.log("damaloy backend server running on port", PORT)
-  });
-})
+if (process.env.VERCEL) {
+  // On Vercel, we can try to init DB but without blocking the export.
+  // Ideally, migrations should be done separately, but we'll leave it fire-and-forget or top-level.
+  // For safety, we just export app.
+  initDB();
+} else {
+  initDB().then(() => {
+    app.listen(PORT, () => {
+      console.log("damaloy backend server running on port", PORT)
+    });
+  })
+}
+
+export default app;
 
 
 app.get('/', (req, res) => {

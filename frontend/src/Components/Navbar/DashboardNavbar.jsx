@@ -54,7 +54,7 @@ const DashboardLink = () => {
       { path: "/dashboard/seller/myProducts", name: 'My Products', icon: <FaShoppingCart className="text-lg" /> },
       { path: "/dashboard/seller/postAdvertisement", name: 'Post Ad', icon: <RiAdvertisementFill className="text-lg" /> },
       { path: "/dashboard/seller/myAdvertisement", name: 'My Ads', icon: <RiAdvertisementFill className="text-lg" /> },
-      { path: "/dashboard/seller/sells", name: 'Sales', icon: <MdPointOfSale /> },
+      
     ];
 
     const adminLinks = [
