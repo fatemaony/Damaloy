@@ -6,11 +6,13 @@ import useAuth from '../../Hooks/useAuth';
 import Swal from 'sweetalert2';
 
 const ProductCard = ({ product }) => {
-  const { name, image, price, average_rating, review_count, unit, store_category } = product || {};
+  const { name, image, price, average_rating, review_count, unit, store_category, discount } = product || {};
   const { user } = useAuth();
   const axiosInstance = useAxios();
   const navigate = useNavigate();
   const [adding, setAdding] = useState(false);
+
+  const discountedPrice = discount ? (price - (price * discount / 100)).toFixed(2) : price;
 
   const handleAddToCart = async () => {
     if (!user) {
@@ -59,13 +61,13 @@ const ProductCard = ({ product }) => {
 
       if (response.data.success) {
         await Swal.fire({
-            title: `${name} Added to Cart!`,
-            icon: 'success',
-            timer: 1200,
-            showConfirmButton: false,
-            toast: true,
-            position: 'top-end'
-          });
+          title: `${name} Added to Cart!`,
+          icon: 'success',
+          timer: 1200,
+          showConfirmButton: false,
+          toast: true,
+          position: 'top-end'
+        });
       }
     } catch (error) {
       console.error("Error adding to cart:", error);
@@ -86,6 +88,11 @@ const ProductCard = ({ product }) => {
             alt={name}
             className="w-full h-full object-cover"
           />
+          {discount > 0 && (
+            <div className="absolute top-2 left-2 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full">
+              {discount}% OFF
+            </div>
+          )}
         </div>
       </Link>
 
@@ -111,7 +118,10 @@ const ProductCard = ({ product }) => {
           <div className="flex flex-col">
             <span className="text-xs text-gray-500">Price</span>
             <div className="flex items-baseline gap-1">
-              <span className="text-xs font-bold text-secondary">${price}</span>
+              <span className="text-xs font-bold text-secondary">${discountedPrice}</span>
+              {discount > 0 && (
+                <span className="text-xs text-gray-400 line-through">${price}</span>
+              )}
               <span className="text-xs text-gray-500">/{unit}</span>
             </div>
           </div>

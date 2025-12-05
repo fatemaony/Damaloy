@@ -191,13 +191,13 @@ const ProductDetails = () => {
 
       if (response.data.success) {
         Swal.fire({
-            title: 'Review Added!',
-            icon: 'success',
-            timer: 1200,
-            showConfirmButton: false,
-            toast: true,
-            position: 'top-end'
-          });
+          title: 'Review Added!',
+          icon: 'success',
+          timer: 1200,
+          showConfirmButton: false,
+          toast: true,
+          position: 'top-end'
+        });
 
         if (userReview) {
           setReviews(reviews.map(r => r.id === userReview.id ? response.data.data : r));
@@ -249,6 +249,8 @@ const ProductDetails = () => {
   const averageRating = reviews.length > 0
     ? (reviews.reduce((acc, curr) => acc + curr.rating, 0) / reviews.length).toFixed(1)
     : 0;
+
+  const discountedPrice = product ? (product.discount ? (product.price - (product.price * product.discount / 100)).toFixed(2) : product.price) : 0;
 
   if (loading) {
     return (
@@ -325,8 +327,17 @@ const ProductDetails = () => {
                   <span className="ml-2 text-gray-600">({reviews.length} reviews)</span>
                 </div>
 
-                <div className="text-3xl font-bold text-primary mb-6">
-                  ${product.price} <span className="text-sm font-normal text-gray-500">/ {product.unit}</span>
+                <div className="text-3xl font-bold text-primary mb-6 flex items-center gap-3">
+                  ${discountedPrice}
+                  {product.discount > 0 && (
+                    <>
+                      <span className="text-lg font-normal text-gray-400 line-through">${product.price}</span>
+                      <span className="bg-red-100 text-red-600 text-sm font-bold px-2 py-1 rounded-full">
+                        {product.discount}% OFF
+                      </span>
+                    </>
+                  )}
+                  <span className="text-sm font-normal text-gray-500">/ {product.unit}</span>
                 </div>
 
                 <p className="text-gray-600 mb-6 leading-relaxed">

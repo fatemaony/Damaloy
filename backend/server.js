@@ -103,9 +103,17 @@ async function initDB() {
       unit VARCHAR(50) NOT NULL,
       description TEXT,
       quantity INTEGER DEFAULT 0,
+      discount INTEGER DEFAULT 0,
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
       updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )`;
+
+    // Add discount column if it doesn't exist (migration)
+    try {
+      await sql`ALTER TABLE products ADD COLUMN IF NOT EXISTS discount INTEGER DEFAULT 0`;
+    } catch (e) {
+      console.log("Column discount might already exist or error adding it:", e.message);
+    }
 
     // reviews table
     await sql`

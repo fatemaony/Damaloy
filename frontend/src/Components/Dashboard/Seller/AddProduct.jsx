@@ -7,7 +7,7 @@ import useAuth from '../../../Hooks/useAuth';
 
 
 const AddProduct = () => {
-  const { user } =useAuth();
+  const { user } = useAuth();
   const axiosInstance = useAxios();
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -20,6 +20,7 @@ const AddProduct = () => {
       price: '',
       unit: '',
       quantity: '',
+      discount: '',
       description: ''
     }
   });
@@ -182,6 +183,21 @@ const AddProduct = () => {
                   placeholder="0.00"
                 />
                 {errors.price && <span className="text-red-500 text-xs">{errors.price.message}</span>}
+              </div>
+
+              {/* Discount */}
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-gray-700 flex items-center gap-2">
+                  <DollarSign className="h-4 w-4" />
+                  Discount (%)
+                </label>
+                <input
+                  type="number"
+                  {...register("discount", { min: 0, max: 100 })}
+                  className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-primary focus:border-transparent transition-all outline-none"
+                  placeholder="0"
+                />
+                {errors.discount && <span className="text-red-500 text-xs">{errors.discount.message}</span>}
               </div>
 
               {/* Unit */}

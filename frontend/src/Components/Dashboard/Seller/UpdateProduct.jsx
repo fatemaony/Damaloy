@@ -23,6 +23,7 @@ const UpdateProduct = () => {
       price: '',
       unit: '',
       quantity: '',
+      discount: '',
       description: ''
     }
   });
@@ -56,6 +57,7 @@ const UpdateProduct = () => {
           setValue('price', product.price);
           setValue('unit', product.unit);
           setValue('quantity', product.quantity);
+          setValue('discount', product.discount || 0);
           setValue('description', product.description);
         }
       } catch (error) {
@@ -131,7 +133,7 @@ const UpdateProduct = () => {
       }
     } catch (error) {
       console.error("Error updating product", error);
-      Swal.fire({ 
+      Swal.fire({
         icon: 'error',
         title: 'Oops...',
         text: 'Something went wrong! Please try again.',
@@ -248,6 +250,21 @@ const UpdateProduct = () => {
                   placeholder="0"
                 />
                 {errors.quantity && <span className="text-red-500 text-xs">{errors.quantity.message}</span>}
+              </div>
+
+              {/* Discount */}
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-gray-700 flex items-center gap-2">
+                  <DollarSign className="h-4 w-4" />
+                  Discount (%)
+                </label>
+                <input
+                  type="number"
+                  {...register("discount", { min: 0, max: 100 })}
+                  className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-primary focus:border-transparent transition-all outline-none"
+                  placeholder="0"
+                />
+                {errors.discount && <span className="text-red-500 text-xs">{errors.discount.message}</span>}
               </div>
 
               {/* Image Upload */}

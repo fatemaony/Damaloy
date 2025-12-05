@@ -162,3 +162,72 @@ export const deleteSeller = async (req, res) => {
     res.status(500).json({ success: false, message: "Server Error" });
   }
 };
+export const getSellerStats = async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    // Total Sales (sum of order items for this seller)
+    const totalSalesResult = await sql`
+      SELECT COALESCE(SUM(oi.price * oi.quantity), 0) as total_sales
+      FROM order_items oi
+      JOIN products p ON oi.product_id = p.id
+      WHERE p.seller_id = ${id}
+    `;
+    const totalSales = parseFloat(totalSalesResult[0].total_sales);
+
+    // Total Orders (count of unique orders containing seller's products)
+    const totalOrdersResult = await sql`
+      SELECT COUNT(DISTINCT oi.order_id) as total_orders
+      FROM order_items oi
+      JOIN products p ON oi.product_id = p.id
+      WHERE p.seller_id = ${id}
+    `;
+    const totalOrders = parseInt(totalOrdersResult[0].total_orders);
+
+    // Total Products
+    const totalProductsResult = await sql`
+      SELECT COUNT(*) as total_products
+      FROM products
+      WHERE seller_id = ${id}
+    `;
+    const totalProducts = parseInt(totalProductsResult[0].total_products);
+
+    // Recent Orders (last 5)
+    const recentOrders = await sql`
+      SELECT DISTINCT ON (o.id) o.id, o.created_at, o.total_amount, o.order_status, u.name as customer_name
+      FROM orders o
+      JOIN order_items oi ON o.id = oi.order_id
+      JOIN products p ON oi.product_id = p.id
+      JOIN users u ON o.user_id = u.user_id
+      WHERE p.seller_id = ${id}
+      ORDER BY o.id, o.created_at DESC
+      LIMIT 5
+    `;
+
+    // Sales Over Time (for chart - last 7 days)
+    const salesOverTime = await sql`
+      SELECT DATE(o.created_at) as date, SUM(oi.price * oi.quantity) as sales
+      FROM orders o
+      JOIN order_items oi ON o.id = oi.order_id
+      JOIN products p ON oi.product_id = p.id
+      WHERE p.seller_id = ${id}
+      GROUP BY DATE(o.created_at)
+      ORDER BY DATE(o.created_at) ASC
+      LIMIT 7
+    `;
+
+    res.status(200).json({
+      success: true,
+      data: {
+        totalSales,
+        totalOrders,
+        totalProducts,
+        recentOrders,
+        salesOverTime
+      }
+    });
+  } catch (error) {
+    console.error("Error fetching seller stats:", error);
+    res.status(500).json({ success: false, message: "Server Error" });
+  }
+};

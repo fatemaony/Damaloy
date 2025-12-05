@@ -1,12 +1,12 @@
 import { sql } from '../config/db.js';
 
 export const createProduct = async (req, res) => {
-  const { name, image, price, unit, description, quantity, seller_id } = req.body;
+  const { name, image, price, unit, description, quantity, seller_id, discount } = req.body;
 
   try {
     const newProduct = await sql`
-      INSERT INTO products (name, image, price, unit, description, quantity, seller_id)
-      VALUES (${name}, ${image}, ${price}, ${unit}, ${description}, ${quantity || 0}, ${seller_id})
+      INSERT INTO products (name, image, price, unit, description, quantity, seller_id, discount)
+      VALUES (${name}, ${image}, ${price}, ${unit}, ${description}, ${quantity || 0}, ${seller_id}, ${discount || 0})
       RETURNING *
     `;
 
@@ -30,7 +30,7 @@ export const createProduct = async (req, res) => {
 };
 
 export const getAllProducts = async (req, res) => {
-  const { search, category, seller_id, page = 1, limit = 12 } = req.query;
+  const { search, category, seller_id, has_discount, page = 1, limit = 12 } = req.query;
   const offset = (page - 1) * limit;
 
   try {
@@ -54,6 +54,10 @@ export const getAllProducts = async (req, res) => {
 
     if (seller_id) {
       conditions.push(sql`p.seller_id = ${seller_id}`);
+    }
+
+    if (has_discount === 'true') {
+      conditions.push(sql`p.discount > 0`);
     }
 
     if (conditions.length > 0) {
@@ -122,12 +126,12 @@ export const getProduct = async (req, res) => {
 
 export const updateProduct = async (req, res) => {
   const { id } = req.params;
-  const { name, image, price, unit, description, quantity } = req.body;
+  const { name, image, price, unit, description, quantity, discount } = req.body;
 
   try {
     const updatedProduct = await sql`
       UPDATE products
-      SET name = ${name}, image = ${image}, price = ${price}, unit = ${unit}, description = ${description}, quantity = ${quantity}
+      SET name = ${name}, image = ${image}, price = ${price}, unit = ${unit}, description = ${description}, quantity = ${quantity}, discount = ${discount || 0}
       WHERE id = ${id}
       RETURNING *
     `;
@@ -210,7 +214,9 @@ export const getTopProducts = async (req, res) => {
   try {
     const topProducts = await sql`
       SELECT p.*, 
-             COALESCE(SUM(oi.quantity), 0) as total_sold
+             COALESCE(SUM(oi.quantity), 0) as total_sold,
+             (SELECT COALESCE(AVG(rating), 0) FROM reviews WHERE product_id = p.id) as average_rating,
+             (SELECT COUNT(*) FROM reviews WHERE product_id = p.id) as review_count
       FROM products p
       LEFT JOIN order_items oi ON p.id = oi.product_id
       GROUP BY p.id

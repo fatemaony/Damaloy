@@ -101,6 +101,9 @@ const SignUp = () => {
         text: 'Account created successfully.',
         icon: 'success',
         confirmButtonText: 'Go to Home',
+        buttonsStyling: false,
+        customClass: { confirmButton: 'btn btn-primary' }
+
       }).then(() => {
         navigate('/');
       });
